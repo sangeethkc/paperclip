@@ -8,6 +8,7 @@ import { validate } from "../middleware/validate.js";
 import { fastResponseService } from "../services/fast-responses.js";
 import { heartbeatService } from "../services/heartbeat.js";
 import { listOpenRouterModels } from "../services/openrouter-models.js";
+import { listNvidiaModels } from "../services/nvidia-models.js";
 import { fastResponseCatalogModels } from "../services/fast-response-models.js";
 import { parseCostDateRange, parseCostLimit } from "./costs.js";
 
@@ -59,6 +60,12 @@ export function fastResponseRoutes(db: Db) {
         ? (await listOpenRouterModels()).map((m) => ({
             ...m,
             id: m.id.replace(/^openrouter\//, ""),
+          }))
+        : connection.provider === "nvidia" ||
+          connection.routing?.kind === "nvidia"
+        ? (await listNvidiaModels()).map((m) => ({
+            ...m,
+            id: m.id.replace(/^nvidia\//, ""),
           }))
         : fastResponseCatalogModels(connection);
     res.json(models);

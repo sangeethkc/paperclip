@@ -2036,7 +2036,6 @@ function OnboardingWizardInner({
             : adapterType === "opencode_local"
               ? model
               : model,
-              : model,
       command,
       args,
       url,

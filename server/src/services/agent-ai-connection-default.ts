@@ -16,6 +16,7 @@ const PROVIDER_AUTH_ENV_KEYS: Record<AiProvider, readonly string[]> = {
   openai: ["OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_HOME", "OPENAI_BASE_URL"],
   openrouter: ["OPENROUTER_API_KEY", "OPENCODE_AUTH_JSON", "OPENCODE_CONFIG_CONTENT", "OPENCODE_CONFIG", "OPENCODE_CONFIG_DIR", "PAPERCLIP_OPENCODE_PROVIDERS"],
   xai: ["XAI_API_KEY", "GROK_API_KEY", "GROK_HOME", "XAI_BASE_URL"],
+  nvidia: ["NVIDIA_API_KEY", "NVIDIA_API_KEY", "OPENCODE_AUTH_JSON", "OPENCODE_CONFIG_CONTENT", "OPENCODE_CONFIG", "OPENCODE_CONFIG_DIR", "PAPERCLIP_OPENCODE_PROVIDERS"],
 };
 
 /** A hire inherits a connection choice, never its manager's credentials or identity. */
@@ -41,7 +42,7 @@ export function defaultAiConnectionForHire(
     // outside the managed OpenRouter catalog. Their auth still takes precedence.
     const childProvider = adapterType === "opencode_local"
       || (adapterType === "paperclip_runner" && config.provider === "opencode")
-      ? "openrouter"
+      ? (config.provider === "nvidia" ? "nvidia" : "openrouter")
       : AI_PROVIDERS.find((provider) =>
         compatible({ provider, method: "api_key", mode: "responsible_user" }));
     return childProvider && hasChildAuth(childProvider) ? undefined : inherited.data;

@@ -3009,7 +3009,7 @@ function OnboardingWizardInner({
                         setAdapterType(id);
                         if (id !== adapterType) setRunner("auto");
                         if (id !== adapterType) {
-                          if (id === "opencode_local") setModel(DEFAULT_OPENCODE_LOCAL_MODEL);
+                          if (id === "opencode_local") setModel("");
                           else if (id !== "codex_local") setModel("");
                         }
                         setConnectPhase("collapsing");

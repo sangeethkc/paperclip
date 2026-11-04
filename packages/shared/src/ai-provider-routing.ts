@@ -3,7 +3,7 @@ import { z } from "zod";
 /** Value-free routing stored on the connection, never supplied by an agent binding. */
 export const aiProviderRoutingSchema = z
   .object({
-    kind: z.enum(["openrouter", "bedrock", "gateway", "local"]),
+    kind: z.enum(["openrouter", "bedrock", "gateway", "local", "nvidia"]),
     protocol: z.enum(["responses", "messages", "chat", "bedrock"]),
     baseUrl: z.string().trim().max(2048).optional(),
     auth: z
@@ -73,6 +73,12 @@ export const aiProviderRoutingSchema = z
         );
       }
     }
+    if (route.kind === "nvidia") {
+      if (route.protocol !== "chat")
+        invalid("NVIDIA NIM requires the chat completions protocol.");
+      if (route.auth !== "bearer" && route.auth !== "api_key")
+        invalid("NVIDIA NIM requires bearer or API key authentication.");
+    }
   });
 export type AiProviderRouting = z.infer<typeof aiProviderRoutingSchema>;
 export function aiRoutingHarness(
@@ -112,6 +118,12 @@ export function isAiRoutingCompatible(
       "pi_local",
       "hermes_local",
     ].includes(harness);
+  if (route.kind === "nvidia")
+    return [
+      "opencode_local",
+      "pi_local",
+      "hermes_local",
+    ].includes(harness);
   if (route.protocol === "responses") return harness === "codex_local";
   if (route.protocol === "messages") return harness === "claude_local";
   return ["opencode_local", "hermes_local"].includes(harness);
@@ -122,6 +134,8 @@ export function aiRoutingBaseUrl(
 ): string {
   return route.kind === "openrouter"
     ? `https://openrouter.ai/api${harness === "claude_local" ? "" : "/v1"}`
+    : route.kind === "nvidia"
+    ? (route.baseUrl ?? "https://integrate.api.nvidia.com/v1").replace(/\/+$/, "")
     : (route.baseUrl ?? "").replace(/\/+$/, "");
 }
 
@@ -141,12 +155,13 @@ export function aiConnectionCatalogSlug(provider: string, routing?: Pick<AiProvi
     return routing.protocol === "messages" ? "messages-api"
       : routing.protocol === "chat" ? "chat-completions-api" : "responses-api";
   }
+  if (routing?.kind === "nvidia") return "nvidia";
   return routing?.kind ?? provider;
 }
 
 /** Direct catalog setup presets; legacy gateway links still open their existing setup. */
 export function aiProviderSetupPreset(source: string | null): {
-  provider: "openrouter" | "bedrock" | "gateway" | "local" | "google";
+  provider: "openrouter" | "bedrock" | "gateway" | "local" | "google" | "nvidia";
   protocol?: AiProviderRouting["protocol"];
   label?: string;
 } | undefined {
@@ -155,7 +170,7 @@ export function aiProviderSetupPreset(source: string | null): {
     case "messages-api": return { provider: "gateway", protocol: "messages", label: "Messages API" };
     case "chat-completions-api": return { provider: "gateway", protocol: "chat", label: "Chat Completions API" };
     case "google-ai": return { provider: "google" };
-    case "google": case "openrouter": case "bedrock": case "gateway": case "local": return { provider: source };
+    case "google": case "openrouter": case "bedrock": case "gateway": case "local": case "nvidia": return { provider: source };
     default: return undefined;
   }
 }

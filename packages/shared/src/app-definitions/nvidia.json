@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "nvidia",
+  "name": "NVIDIA NIM",
+  "description": "Connect NVIDIA NIM accounts for your agents.",
+  "categories": [
+    "ai"
+  ],
+  "branding": {
+    "logoUrl": "/brands/apps/nvidia.svg",
+    "darkLogoUrl": "/brands/apps/nvidia-dark.svg"
+  },
+  "urlPatterns": [
+    "https://integrate.api.nvidia.com/v1/*"
+  ],
+  "methods": [
+    {
+      "key": "ai-api_key",
+      "label": "NVIDIA NIM API key",
+      "purpose": "ai",
+      "transport": "runtime_auth",
+      "auth": "api_key",
+      "ai": {
+        "provider": "nvidia",
+        "method": "api_key"
+      },
+      "grantKinds": [
+        "user",
+        "organization"
+      ],
+      "ownershipModes": [
+        "customer"
+      ],
+      "whenToUse": "Authenticate an agent with this account.",
+      "guidanceMd": "Use your personal account or an explicitly shared company account.",
+      "riskTier": "S3",
+      "credentialFields": [
+        {
+          "key": "apiKey",
+          "label": "API key",
+          "type": "password",
+          "required": true,
+          "placeholder": "Enter NVIDIA NIM API key",
+          "secret": true
+        }
+      ],
+      "keyPlacement": {
+        "location": "env",
+        "name": "NVIDIA_API_KEY"
+      }
+    }
+  ],
+  "tags": [
+    "model-provider"
+  ]
+}

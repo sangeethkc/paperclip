@@ -1694,7 +1694,7 @@ function OnboardingWizardInner({
     // unofferable, so the question is open again.
     setSourcePicked(false);
     if (next === "opencode_local") {
-      setModel(DEFAULT_OPENCODE_LOCAL_MODEL);
+      setModel("");
       return;
     }
     if (next === "gemini_local") {
@@ -2034,7 +2034,8 @@ function OnboardingWizardInner({
           : adapterType === "cursor"
             ? model || DEFAULT_CURSOR_LOCAL_MODEL
             : adapterType === "opencode_local"
-              ? model || DEFAULT_OPENCODE_LOCAL_MODEL
+              ? model
+              : model,
               : model,
       command,
       args,

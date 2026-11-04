@@ -34,6 +34,7 @@ export const AI_PROVIDERS = [
   "xai",
   "github",
   "google",
+  "nvidia",
 ] as const;
 export const aiProviderSchema = z.enum(AI_PROVIDERS);
 export const aiAuthMethodSchema = z.enum(["subscription", "api_key"]);
@@ -118,6 +119,12 @@ export const AI_CONNECTION_CAPABILITIES: Record<
       api_key: { adapters: ["grok_local"], envKey: "XAI_API_KEY" },
     },
   },
+  nvidia: {
+    name: "NVIDIA NIM",
+    methods: {
+      api_key: { adapters: ["opencode_local", "pi_local", "hermes_local"], envKey: "NVIDIA_API_KEY" },
+    },
+  },
 };
 export function isAiConnectionCompatible(
   requirement: AiConnectionMetadata | AiConnectionBinding,
@@ -136,7 +143,7 @@ export function isAiConnectionCompatible(
   // A fixed binding contains identity only. The service checks authoritative
   // connection metadata before resolving credentials or running the harness.
   if (adapterType === "pi_local") return (requirement.method === "api_key" || ("mode" in requirement && requirement.mode === "responsible_user"))
-    && ["openrouter", "openai", "anthropic", "google"].includes(requirement.provider)
+    && ["openrouter", "openai", "anthropic", "google", "nvidia"].includes(requirement.provider)
     && typeof model === "string" && model.startsWith(`${requirement.provider}/`);
   if ("mode" in requirement && requirement.mode !== "responsible_user" && requirement.method === "api_key")
     return ["claude_local", "codex_local", "opencode_local", "hermes_local", "gemini_local", "grok_local", "copilot_runtime"].includes(adapterType);

@@ -177,7 +177,7 @@ it("uses the server's connection-manager permission for company-wide access", as
 
 it("offers Pi account selection before choosing its required model", async () => {
   mocks.list.mockResolvedValue({ currentUserId: "owner", connections: [], canManageConnections: true });
-  expect(aiProviderForAdapter("pi_local")).toBe("openrouter");
+  expect(aiProviderForAdapter("pi_local")).toBe("nvidia");
   flushSync(() => root.render(<QueryClientProvider client={client}>
     <AiConnectionField companyId="company" agentId="agent" agentName="Pi" adapterType="pi_local" model=""
       value={{ provider: "openrouter", method: "api_key", mode: "responsible_user" }} onChange={onChange} />

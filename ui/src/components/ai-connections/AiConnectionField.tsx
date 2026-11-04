@@ -35,13 +35,13 @@ export function aiProviderForAdapter(
     {
       claude_local: "anthropic",
       codex_local: "openai",
-      opencode_local: "openrouter",
-      pi_local: "openrouter",
+      opencode_local: "nvidia",
+      pi_local: "nvidia",
       grok_local: "xai",
       copilot_runtime: "github",
       antigravity_runtime: "google",
       gemini_local: "google",
-      hermes_local: "openrouter",
+      hermes_local: "nvidia",
     } as Record<string, AiProvider>
   )[adapterType];
 }

@@ -41,6 +41,11 @@ const providers = [
   { id: "google", name: "Google", description: "Antigravity sign-in or Gemini API key" },
   { id: "xai", name: "xAI", description: "Grok subscription or API key" },
   {
+    id: "nvidia",
+    name: "NVIDIA NIM",
+    description: "NVIDIA NIM API key",
+  },
+  {
     id: "openrouter",
     name: "OpenRouter",
     description: "Models through one API key",
@@ -61,7 +66,7 @@ const providers = [
   {
     id: "local",
     name: "Local endpoint",
-    description: "A model server in the agent’s environment",
+    description: "A model server in the agent's environment",
     advanced: true,
   },
 ] as const;
@@ -110,7 +115,7 @@ export function AiProviderSetup({
   const [allAgentsChoice, setAllAgents] = useState<boolean>();
   const [agentIds, setAgentIds] = useState(new Set(agentId ? [agentId] : []));
   const [protocol, setProtocol] = useState<AiProviderRouting["protocol"]>(
-    reconnect?.routing?.protocol ?? initialProtocol ?? "responses",
+    reconnect?.routing?.protocol ?? initialProtocol ?? (provider === "nvidia" ? "chat" : "responses"),
   );
   const [auth, setAuth] = useState<AiProviderRouting["auth"]>(
     reconnect?.routing?.auth ?? "bearer",
@@ -146,6 +151,8 @@ export function AiProviderSetup({
         ? protocol === "messages"
           ? "anthropic"
           : "openai"
+        : provider === "nvidia"
+        ? "nvidia"
         : (provider ?? "openai");
   const name =
     reconnect?.name ??
@@ -181,7 +188,7 @@ export function AiProviderSetup({
         aiProviderRoutingSchema.parse({
           kind: provider,
           protocol: provider === "bedrock" ? "bedrock" : protocol,
-          auth: provider === "openrouter" ? "bearer" : auth,
+          auth: provider === "openrouter" ? "bearer" : provider === "nvidia" ? "bearer" : auth,
           ...(provider === "bedrock"
             ? { region }
             : provider === "gateway" || provider === "local"
@@ -228,6 +235,8 @@ export function AiProviderSetup({
                   <Monitor className="size-5" />
                 )}
               </span>
+            ) : p.id === "nvidia" ? (
+              <AppLogo name={p.name} brandKey="nvidia" />
             ) : (
               <AppLogo name={p.name} brandKey={p.id} />
             ),
@@ -338,6 +347,8 @@ export function AiProviderSetup({
                   placeholder={
                     provider === "local"
                       ? "http://localhost:11434/v1"
+                      : provider === "nvidia"
+                      ? "https://integrate.api.nvidia.com/v1"
                       : "https://gateway.example.com/v1"
                   }
                   value={baseUrl}

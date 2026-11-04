@@ -807,9 +807,11 @@ function OnboardingWizardInner({
   const hasGatewaySelection = credentialMode === "api" && gatewayConnection?.companyId === createdCompanyId && gatewayConnection.adapterType === adapterType;
   const gatewayLookupFailed = hasGatewaySelection && !connectionModelState.refreshing
     && Boolean(connectionModelState.error || (!connectionModels && !connectionModelState.loading));
-  const connectionModelReady = (!hasGatewaySelection && !connectionModels) || Boolean(connectionModels
-    && (!hasGatewaySelection || (!connectionModelState.error && !connectionModelState.refreshing))
-    && model.trim() && (connectionModels.models.length === 0 || connectionModels.models.some(entry => entry.id === model.trim())));
+  const connectionModelReady = adapterType === "opencode_local"
+    ? true
+    : (!hasGatewaySelection && !connectionModels) || Boolean(connectionModels
+      && (!hasGatewaySelection || (!connectionModelState.error && !connectionModelState.refreshing))
+      && model.trim() && (connectionModels.models.length === 0 || connectionModels.models.some(entry => entry.id === model.trim())));
   createdCompanyIdRef.current = createdCompanyId;
 
   // The step the request wants, mirrored for the same reason. `initialStep` is
@@ -2034,7 +2036,7 @@ function OnboardingWizardInner({
           : adapterType === "cursor"
             ? model || DEFAULT_CURSOR_LOCAL_MODEL
             : adapterType === "opencode_local"
-              ? model
+              ? model || ""
               : model,
       command,
       args,
@@ -2345,13 +2347,9 @@ function OnboardingWizardInner({
     let qualifiedDiscovery: { adapters: AdapterInfo[]; environmentId: string | null } | undefined;
     try {
       if (adapterType === "opencode_local") {
-        const selectedModelId = model.trim();
-        if (!isValidOpenCodeModelId(selectedModelId)) {
-          setError(
-            "OpenCode requires an explicit model in provider/model format."
-          );
-          return;
-        }
+        // Skip model validation - model will be configured via AI Connections
+        // after onboarding. NVIDIA NIM models are discovered through the
+        // connection setup flow, not through OpenCode's model discovery.
         if (adapterModelsError) {
           setError(
             adapterModelsError instanceof Error
@@ -2363,15 +2361,6 @@ function OnboardingWizardInner({
         if (adapterModelsLoading || adapterModelsFetching) {
           setError(
             "OpenCode models are still loading. Please wait and try again."
-          );
-          return;
-        }
-        const discoveredModels = adapterModels ?? [];
-        if (!discoveredModels.some((entry) => entry.id === selectedModelId)) {
-          setError(
-            discoveredModels.length === 0
-              ? "No OpenCode models discovered. Run `opencode models` and authenticate providers."
-              : `Configured OpenCode model is unavailable: ${selectedModelId}`
           );
           return;
         }
